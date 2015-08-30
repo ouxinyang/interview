@@ -1,8 +1,9 @@
-
 #include "proxy_url_extractor.h"
 #include <fstream>
 #include <vector>
+#include <iostream>
 #include "tokener.h"
+#include<limits.h>//要使用INT_MAX
 
 namespace qh
 {
@@ -99,9 +100,44 @@ namespace qh
     void ProxyURLExtractor::Extract( const KeyItems& keys, const std::string& raw_url, std::string& sub_url )
     {
 #if 1
-        //TODO �������������������Լ��Ĵ���ʵ����������蹦��
+        //TODO 请面试者在这里添加自己的代码实现以完成所需功能	
+		//首先默认没有找到与key相应的value，把sub_url设置为空
+		sub_url = "";
+		
+		if(raw_url == "")
+			return;
+		
+		Tokener token(raw_url);
+        token.skipTo('?');
+        token.next(); //skip one char : '?' 
+        std::string tmp_url(token.getCurReadPos());
+		
+		//找"=",若连"="都没有那就可以直接返回了
+        if (tmp_url.find("=") == std::string::npos){
+            return;
+        }
+
+		//根据"&"对url进行参数的区域划分,假设最多有INT_MAX（已包含头文件<limits.h>）个区域
+        std::vector<std::string> region;
+        StringSplit(tmp_url, "&", INT_MAX, region);
+        //如果没有参数那么也可以返回了
+        if (region.size() == 0){
+			return;
+		}
+		
+		//依次比较每个参数域，看看它的key是否是要找的key，是则返回对应的value
+        std::vector<std::string>::iterator it;
+        for (it = region.begin(); it != region.end(); ++it){
+            std::vector<std::string> key_value;
+			//对每个参数域，我们根据"="把参数域划分为key和value，key存在key_value[0],value存在key_value[1]
+            StringSplit(*it, "=", 2, key_value);
+            if (keys.find(key_value[0]) != keys.end() && key_value.size() > 1){
+                sub_url = key_value[1];
+                return;
+            }
+        }
 #else
-        //����һ�ݲο�ʵ�֣�������������¹������ܷ���Ԥ��
+        //这是一份参考实现，但在特殊情况下工作不能符合预期
         Tokener token(raw_url);
         token.skipTo('?');
         token.next(); //skip one char : '?' 
@@ -111,14 +147,12 @@ namespace qh
             if (keys.find(key) != keys.end()) {
                 const char* curpos = token.getCurReadPos();
                 int nreadable = token.getReadableSize();
-
                 /**
                 * case 1: 
                 *  raw_url="http://www.microsofttranslator.com/bv.aspx?from=&to=zh-chs&a=http://hnujug.com/&xx=yy"
                 *  sub_url="http://hnujug.com/"
                 */
                 sub_url = token.nextString('&');
-
                 if (sub_url.empty() && nreadable > 0) {
                     /**
                     * case 2: 
@@ -142,4 +176,3 @@ namespace qh
         return sub_url;
     }
 }
-
