@@ -1,17 +1,79 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include "qh_string.h"
+#include <assert.h>
+#include <string.h>
+#include <iostream>
+#define H_ARRAYSIZE(a) \
+    ((sizeof(a) / sizeof(*(a))) / \
+    static_cast<size_t>(!(sizeof(a) % sizeof(*(a)))))
 
+#define H_ARRAY_SIZE H_ARRAYSIZE
+using namespace qh;
+
+void test1()
+{
+	//æœ€åŸºæœ¬çš„æ„é€ å‡½æ•°
+    const char* srcstring = "test1";
+    qh::string qh_mystring(srcstring);
+    assert(!strcmp(qh_mystring.data(), srcstring));
+}
+
+void test2()
+{
+	//æ‹·è´æ„é€ å‡½æ•°
+    const char* srcstring = "test2";
+    qh::string qh_mystring1(srcstring);
+    qh::string qh_mystring2(qh_mystring1);
+    assert(!strcmp(qh_mystring2.data(), srcstring));
+}
+
+void test3()
+{
+	//æŒ‡å®šé•¿åº¦çš„æ‹·è´æ„é€ å‡½æ•°
+    const char* srcstring = "test3test3";
+    qh::string qh_mystring1(srcstring,5);
+    assert(!strcmp(qh_mystring1.data(), "test3"));
+}
+
+void test4()
+{
+	//è¿ç®—ç¬¦=
+    const char* srcstring = "test4";
+    qh::string qh_mystring1(srcstring);
+    qh::string qh_mystring2 = qh_mystring1;
+    assert(!strcmp(qh_mystring2.data(), srcstring));
+}
+
+void test5()
+{
+	//è¿ç®—ç¬¦[]
+    qh::string qh_mystring("test5");
+    assert(*qh_mystring[1]=='e');
+}
+
+void test6()
+{
+	//ç©ºå­—ç¬¦ä¸²
+    qh::string qh_mystring1;
+    assert(qh_mystring1.size() == 0);
+	assert(!strcmp(qh_mystring1.data(), "\0"));
+}
 
 int main(int argc, char* argv[])
 {
-    //TODO ÔÚÕâÀïÌí¼Óµ¥Ôª²âÊÔ£¬Ô½¶àÔ½ºÃ£¬´úÂëÂ·¾¶¸²¸ÇÂÊÔ½È«Ô½ºÃ
-    //TODO µ¥Ôª²âÊÔĞ´·¨Çë²Î¿¼INIParserÄÇ¸öÏîÄ¿£¬²»ÒªĞ´Ò»¶Ñprintf£¬ÒªÓÃassert½øĞĞ¶ÏÑÔÅĞ¶Ï¡£
+    //TODO åœ¨è¿™é‡Œæ·»åŠ å•å…ƒæµ‹è¯•ï¼Œè¶Šå¤šè¶Šå¥½ï¼Œä»£ç è·¯å¾„è¦†ç›–ç‡è¶Šå…¨è¶Šå¥½
+    //TODO å•å…ƒæµ‹è¯•å†™æ³•è¯·å‚è€ƒINIParseré‚£ä¸ªé¡¹ç›®ï¼Œä¸è¦å†™ä¸€å †printfï¼Œè¦ç”¨assertè¿›è¡Œæ–­è¨€åˆ¤æ–­ã€‚
+    test1();
+    test2();
+    test3();
+    test4();
+    test5();
+    test6();
+    std::cout<<"All test passed!"<<std::endl;
 
 #ifdef WIN32
     system("pause");
 #endif
-
 	return 0;
 }
-
